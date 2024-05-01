@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as ptc
 import math as mt
 
+
 import os
 
 # Carregar os dados do arquivo CSV
@@ -27,16 +28,16 @@ data['team'] = [x.replace('\xa0', '') for x in data['team']]
 # Remover os valores duplicados
 times = list(set(times))
 
-dados = data.values
+# dados = data.values
 #fazer replace de \xa0 por espaço em branco
-for i in range(len(dados)):
-    dados[i][2] = dados[i][2].replace('\xa0', '')
+# for i in range(len(dados)):
+#     dados[i][2] = dados[i][2].replace('\xa0', '')
 
 #Para cada elemnto da lista de times, Verificar os indices onde aparecu no array dados
 
-time_idx = [np.where(data['team'] == time)[0] for time in times]
+# time_idx = [np.where(data['team'] == time)[0] for time in times]
 
-# # Salvar em csv os dados de cada time
+# Salvar em csv os dados de cada time
 # for i in range(len(times)):
 #     time = times[i]
 #     time_data = dados[time_idx[i]]
@@ -69,7 +70,7 @@ def update_plots(year_range,dados1,dados2,name1,name2,color1,color2):
         fig.patch.set_linewidth(2)
 
         # Adicionando um "HUD" como título
-        fig.suptitle(f'Desempenho {name1} X {name2}', fontsize=20, color='white', backgroundcolor='black', va='center', ha='center')
+        fig.suptitle(f'{name1} X {name2}', fontsize=20, color='white', backgroundcolor='black', va='center', ha='center')
 
         # Definindo o GridSpec com layout 2x6
         gs = plt.GridSpec(2, 6, figure=fig)  # Definindo o GridSpec com 2 linhas e 6 colunas
@@ -97,7 +98,7 @@ def update_plots(year_range,dados1,dados2,name1,name2,color1,color2):
         ax2.set_ylabel('Pontos')
         ax2.set_title(f'Pontos de {name1} e {name2} ao Longo dos Anos')
         ax2.legend()
-        ax2.grid(True)
+        ax2.grid(False)
         plt.xticks(rotation=45)
 
         # Para o restante das colunas, fazer gráfico de setor para comparar os valores
@@ -206,8 +207,8 @@ color1 = st.color_picker('Escolha a cor do primeiro clube', color1)
 color2 = cores_times[times.index(name2)]
 color2 = st.color_picker('Escolha a cor do segundo clube', color2)
 
-dados1 = arquivos[times.index(name1)]
-dados2 = arquivos[times.index(name2)]
+dados1 = data[data['team'] == times[times.index(name1)]]
+dados2 = data[data['team'] == times[times.index(name2)]]
 
 # Atualização dos gráficos com base nas seleções do usuário
 update_plots(year_range, dados1, dados2, name1, name2, color1, color2)
