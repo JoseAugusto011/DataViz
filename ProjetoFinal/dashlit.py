@@ -9,7 +9,7 @@ import matplotlib
 import matplotlib.pyplot as plt 
 import matplotlib.patches as ptc
 import math as mt
-
+import escudos_ler as escu
 
 import os
 
@@ -28,16 +28,16 @@ data['team'] = [x.replace('\xa0', '') for x in data['team']]
 # Remover os valores duplicados
 times = list(set(times))
 
-# dados = data.values
+dados = data.values
 #fazer replace de \xa0 por espaço em branco
-# for i in range(len(dados)):
-#     dados[i][2] = dados[i][2].replace('\xa0', '')
+for i in range(len(dados)):
+    dados[i][2] = dados[i][2].replace('\xa0', '')
 
 #Para cada elemnto da lista de times, Verificar os indices onde aparecu no array dados
 
-# time_idx = [np.where(data['team'] == time)[0] for time in times]
+time_idx = [np.where(data['team'] == time)[0] for time in times]
 
-# Salvar em csv os dados de cada time
+# # Salvar em csv os dados de cada time
 # for i in range(len(times)):
 #     time = times[i]
 #     time_data = dados[time_idx[i]]
@@ -51,9 +51,8 @@ times = list(set(times))
 arquivos = []
 for root, dirs, files in os.walk('times'):
     for file in files:
-        print("name: ", file)
         arquivos.append(pd.read_csv('times/'+file, sep=';'))
-        print('-----------------')
+        
 
 # Função para atualizar os gráficos com base no intervalo de anos selecionado
 def update_plots(year_range,dados1,dados2,name1,name2,color1,color2):
@@ -70,13 +69,25 @@ def update_plots(year_range,dados1,dados2,name1,name2,color1,color2):
         fig.patch.set_linewidth(2)
 
         # Adicionando um "HUD" como título
-        fig.suptitle(f'{name1} X {name2}', fontsize=20, color='white', backgroundcolor='black', va='center', ha='center')
+        fig.suptitle(f'Desempenho {name1} X {name2}', fontsize=20, color='white', backgroundcolor='black', va='center', ha='center')
 
         # Definindo o GridSpec com layout 2x6
         gs = plt.GridSpec(2, 6, figure=fig)  # Definindo o GridSpec com 2 linhas e 6 colunas
 
         dados1_filtered = dados1[(dados1['year'] >= year_range[0]) & (dados1['year'] <= year_range[1])]
         dados2_filtered = dados2[(dados2['year'] >= year_range[0]) & (dados2['year'] <= year_range[1])]
+
+        #adicionar os escudos a tela inicial
+        rec = ptc.Rectangle(xy=(0,0), 
+                    height=1, 
+                    width=1,
+                    angle=0,
+                    facecolor='w',
+                    edgecolor='w')
+        ax.add_patch(rec)
+        escu.escolher(name1,ax,0.1,0.1,0.8)
+
+
 
         # Plotar o gráfico de linha comparando a posição final de Fladados1 e São Paulo ao longo dos anos
         ax1 = fig.add_subplot(gs[0, :3])  # Utilizando as três primeiras colunas na primeira linha
@@ -86,9 +97,15 @@ def update_plots(year_range,dados1,dados2,name1,name2,color1,color2):
         ax1.set_ylabel('Posição Final')
         ax1.set_title(f'Posição Final de {name1} e {name2} ao Longo dos Anos')
         ax1.legend()
-        ax1.grid(True)
+        ax1.grid(False)
         ax1.set_xticks(range(year_range[0], year_range[1] + 1, 1))
+        for ano in range(16):
+            if ano < len(dados1_filtered['year']):
+                escu.escolher(name1, ax1,1,dados1_filtered['year'][ano]-0.5,dados1_filtered['position'][ano]+0.5,True)
+            if ano < len(dados2_filtered['year']):
+                escu.escolher(name2, ax1,1,dados2_filtered['year'][ano]-0.5,dados2_filtered['position'][ano]+0.5,True)
         ax1.invert_yaxis()
+        
 
         # Plotar gráfico de barras sobrepostas para comparar a quantidade de pontos de Fladados1 e São Paulo ao longo dos anos
         ax2 = fig.add_subplot(gs[0, 3:])  # Utilizando as três últimas colunas na primeira linha
@@ -100,6 +117,9 @@ def update_plots(year_range,dados1,dados2,name1,name2,color1,color2):
         ax2.legend()
         ax2.grid(False)
         plt.xticks(rotation=45)
+        escu.atletico_goianiense(ax2,100,dados2_filtered['year'][0]-0.5,dados2_filtered['points'][0]+1)
+        #for ano in range(len(dados2_filtered['year'])):
+            #escu.atletico_goianiense(ax2,1,dados2_filtered['year'][ano]-0.5,dados2_filtered['points'][ano]+1.5,True)
 
         # Para o restante das colunas, fazer gráfico de setor para comparar os valores
         columns = dados1.columns[3:-2]  # Selecionando as colunas relevantes
@@ -207,8 +227,8 @@ color1 = st.color_picker('Escolha a cor do primeiro clube', color1)
 color2 = cores_times[times.index(name2)]
 color2 = st.color_picker('Escolha a cor do segundo clube', color2)
 
-dados1 = data[data['team'] == times[times.index(name1)]]
-dados2 = data[data['team'] == times[times.index(name2)]]
+dados1 = arquivos[times.index(name1)]
+dados2 = arquivos[times.index(name2)]
 
 # Atualização dos gráficos com base nas seleções do usuário
 update_plots(year_range, dados1, dados2, name1, name2, color1, color2)
